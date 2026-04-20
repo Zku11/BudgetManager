@@ -1,0 +1,63 @@
+﻿@model UpdateTransactionViewModel
+
+@{
+	ViewData["Title"] = "Editar transacción";
+	var cancelLink = Model.returnUrl ?? Url.Action("Index");
+}
+
+<h1>Editar transacción</h1>
+
+<form asp-action="Edit">
+	<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+	<input type="hidden" asp-for="Id" />
+	<input type="hidden" asp-for="returnUrl" />
+	<input type="hidden" asp-for="PreviousMonto" />
+	<input type="hidden" asp-for="PreviousAcountId" />
+	<div class="mb-3">
+		<label asp-for="TransactionDate" class="form-label"></label>
+		<input asp-for="TransactionDate" class="form-control" />
+		<span asp-validation-for="TransactionDate" class="text-danger"></span>
+	</div>
+	<div class="mb-3">
+		<label asp-for="AcountId" class="form-label"></label>
+		<select asp-for="AcountId" asp-items="@Model.Acounts" class="form-select"></select>
+		<span asp-validation-for="AcountId" class="text-danger"></span>
+	</div>
+	<div class="mb-3">
+		<label asp-for="OperationTypeId" class="form-label"></label>
+		<select asp-for="OperationTypeId" asp-items="Html.GetEnumSelectList<OperationType>()" class="form-select"></select>
+		<span asp-validation-for="OperationTypeId" class="text-danger"></span>
+	</div>
+	<div class="mb-3">
+		<label asp-for="CategoryId" class="form-label"></label>
+		<select asp-for="CategoryId" asp-items="@Model.Categories" class="form-select"></select>
+		<span asp-validation-for="CategoryId" class="text-danger"></span>
+	</div>
+	<div class="mb-3">
+		<label asp-for="Monto" class="form-label"></label>
+		<input asp-for="Monto" class="form-control" />
+		<span asp-validation-for="Monto" class="text-danger"></span>
+	</div>
+	<div class="mb-3">
+		<label asp-for="Nota" class="form-label"></label>
+		<textarea asp-for="Nota" class="form-control"></textarea>
+		<span asp-validation-for="Nota" class="text-danger"></span>
+	</div>
+	<button class="btn btn-primary">Enviar</button>
+	<button class="btn btn-danger" asp-action="Delete">Borrar</button>
+	<a class="btn btn-secondary" href="@cancelLink">Cancelar</a>
+</form>
+
+@section Scripts {
+	<partial name="_ValidationScriptsPartial" />
+
+	<script src="~/js/TransactionsForm.js" asp-append-version="true"></script>
+
+	<script>
+		const urlGetCategories = '@Url.Action("GetCategories")';
+
+		$(function(){
+			InitializaeTransactionForm(urlGetCategories);
+		})
+	</script>
+}

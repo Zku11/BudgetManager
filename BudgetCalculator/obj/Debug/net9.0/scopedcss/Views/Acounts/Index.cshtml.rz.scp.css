@@ -1,0 +1,14 @@
+.total-container[b-7ej0c1otov] {
+    display: flex;
+    justify-content: space-around;
+    font-size: 26px;
+    text-align: center;
+}
+
+.active[b-7ej0c1otov] {
+    color: blue;
+}
+
+.pasive[b-7ej0c1otov] {
+    color: red;
+}

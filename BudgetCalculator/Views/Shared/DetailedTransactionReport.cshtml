@@ -1,0 +1,78 @@
+﻿@model DetailedTransactionReport;
+
+<h4>
+	<a class="btn btn-secondary" asp-route-month="@ViewBag.previousMonth" asp-route-year="@ViewBag.previousYear">
+		<i class="bi-chevron-left"></i>
+	</a>
+	@Model.StartDate.ToString("MMM") - @Model.StartDate.Year
+
+	<a class="btn btn-secondary" asp-route-month="@ViewBag.laterMonth" asp-route-year="@ViewBag.laterYear">
+		<i class="bi-chevron-rigth"></i>
+	</a>
+</h4>
+
+<div class="totals-container mb-3">
+	<div>
+		<div>
+			<strong>Depósitos</strong>
+		</div>
+		<div class="active">
+			@Model.DepositsBalance.ToString("N")
+		</div>
+	</div>
+	<div>
+		<div>
+			<strong>Retiros</strong>
+		</div>
+		<div class="pasive">
+			@Model.ExpensesBalance.ToString("N")
+		</div>
+	</div>
+	<div>
+		<div>
+			<strong>Total</strong>
+		</div>
+		<div>
+			@Model.Total.ToString("N")
+		</div>
+	</div>
+</div>
+
+@if (Model.transactionsByDateList.Count() == 0)
+{
+	<h5>No hay datos para mostrar</h5>
+}
+else
+{
+	<table class="table">
+		<tbody>
+			@foreach (var transactionByDate in Model.transactionsByDateList)
+			{
+				<tr class="fw-bold">
+					<td colspan="3">
+						@transactionByDate.TransactionDate.Day
+						<span class="badge bg-secondary">
+							@transactionByDate.TransactionDate.ToString("ddd")
+						</span>
+					</td>
+					<td class="active">@transactionByDate.DepositsBalance.ToString("N")</td>
+					<td class="pasive">@transactionByDate.ExpensesBalance.ToString("N")</td>
+				</tr>
+				@foreach (var transaction in transactionByDate.Transactions)
+				{
+					<tr style="vertical-align: middle">
+						<td>
+							<a asp-controller="transactions" asp-action="Edit" asp-route-id="@transaction.Id" asp-route-returnUrl="@ViewBag.returnUrl">
+								Editar
+							</a>
+						</td>
+						<td>@transaction.Category</td>
+						<td>@transaction.Acount</td>
+						<td class="active">@(transaction.OperationTypeId == OperationType.Income ? transaction.Monto.ToString("N") : null)</td>
+						<td class="pasive">@(transaction.OperationTypeId == OperationType.Expense ? transaction.Monto.ToString("N") : null)</td>
+					</tr>
+				}
+			}
+		</tbody>
+	</table>
+}
