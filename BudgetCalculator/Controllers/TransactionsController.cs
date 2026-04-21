@@ -41,6 +41,26 @@ namespace BudgetCalculator.Controllers
             return View(model);
         }
 
+        public IActionResult Weekly()
+        {
+            return View();
+        }
+
+        public IActionResult Monthly()
+        {
+            return View();
+        }
+
+        public IActionResult ExcelReport()
+        {
+            return View();
+        }
+
+        public IActionResult Calendar()
+        {
+            return View();
+        }
+
         public async Task<IActionResult> Create()
         {
             int userId = userServices.GetUserId();
@@ -61,28 +81,21 @@ namespace BudgetCalculator.Controllers
                 transactionCreationViewModel.Categories = await GetCategories(userId, transactionCreationViewModel.OperationTypeId);
                 //return View(transactionCreationViewModel);
             }
-
             var acount = await acountsRepository.GetById(transactionCreationViewModel.AcountId, userId);
-
             if (acount is null)
             {
                 RedirectToAction("NotFound", "Home");
             }
-
             var category = await categoryRepository.GetById(transactionCreationViewModel.CategoryId, userId);
-
             if (category is null)
             {
                 RedirectToAction("NotFound", "Home");
             }
-
             transactionCreationViewModel.UserId = userId;
-
             if (transactionCreationViewModel.OperationTypeId == OperationType.Expense)
             {
                 transactionCreationViewModel.Monto *= -1;
             }
-
             await transactionsRepository.Create(transactionCreationViewModel);
             return RedirectToAction("Index");
         }
