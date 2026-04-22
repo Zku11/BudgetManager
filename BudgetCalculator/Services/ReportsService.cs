@@ -5,6 +5,7 @@ namespace BudgetCalculator.Services
 {
     public interface IReportsService
     {
+        Task<IEnumerable<WeeklyReport>> GetByWeeklyReport(int userId, int month, int year, dynamic ViewBag);
         Task<DetailedTransactionReport> GetTransactionReport(int userId, int month, int year, dynamic ViewBag);
         Task<DetailedTransactionReport> GetTransactionReportByAcount(int userId, int acountId, int month, int year, dynamic ViewBag);
     }
@@ -18,6 +19,20 @@ namespace BudgetCalculator.Services
         {
             this.transactionsRepository = transactionsRepository;
             this.httpContext = httpContextAccessor.HttpContext;
+        }
+
+        public async Task<IEnumerable<WeeklyReport>> GetByWeeklyReport(int userId, int month, int year, dynamic ViewBag)
+        {
+            (DateTime startDate, DateTime endDate) = GenerateStartAndEndDates(month, year);
+            var parameter = new GetTransactionsByUserParameter()
+            {
+                UserId = userId,
+                StartDate = startDate,
+                EndDate = endDate
+            };
+            AsignValuesToViewBag(ViewBag, startDate);
+            var model = await transactionsRepository.GetByWeek(parameter);
+            return model;
         }
 
         public async Task<DetailedTransactionReport> GetTransactionReport(int userId, int month, int year, dynamic ViewBag)

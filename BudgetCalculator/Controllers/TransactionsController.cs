@@ -41,8 +41,10 @@ namespace BudgetCalculator.Controllers
             return View(model);
         }
 
-        public IActionResult Weekly()
+        public async Task<IActionResult> Weekly(int month, int year)
         {
+            int userId = userServices.GetUserId();
+            IEnumerable<WeeklyReport> model = await reportsService.GetByWeeklyReport(userId, month, year, ViewBag);
             return View();
         }
 
