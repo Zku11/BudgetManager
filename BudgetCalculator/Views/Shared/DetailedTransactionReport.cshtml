@@ -1,42 +1,17 @@
 ﻿@model DetailedTransactionReport;
 
-<h4>
-	<a class="btn btn-secondary" asp-route-month="@ViewBag.previousMonth" asp-route-year="@ViewBag.previousYear">
-		<i class="bi-chevron-left"></i>
-	</a>
-	@Model.StartDate.ToString("MMM") - @Model.StartDate.Year
+@{
+	var montosResume = new MontosResumeViewModel()
+			{
+				Incomes = Model.DepositsBalance,
+				Expenses = Model.ExpensesBalance,
+				Total = Model.Total
+			};
+}
 
-	<a class="btn btn-secondary" asp-route-month="@ViewBag.laterMonth" asp-route-year="@ViewBag.laterYear">
-		<i class="bi-chevron-rigth"></i>
-	</a>
-</h4>
+<partial name="_NavigateBetweenMonths" model="@Model.StartDate" />
 
-<div class="totals-container mb-3">
-	<div>
-		<div>
-			<strong>Depósitos</strong>
-		</div>
-		<div class="active">
-			@Model.DepositsBalance.ToString("N")
-		</div>
-	</div>
-	<div>
-		<div>
-			<strong>Retiros</strong>
-		</div>
-		<div class="pasive">
-			@Model.ExpensesBalance.ToString("N")
-		</div>
-	</div>
-	<div>
-		<div>
-			<strong>Total</strong>
-		</div>
-		<div>
-			@Model.Total.ToString("N")
-		</div>
-	</div>
-</div>
+<partial name="_MontosResume" model="@montosResume"/>
 
 @if (Model.transactionsByDateList.Count() == 0)
 {

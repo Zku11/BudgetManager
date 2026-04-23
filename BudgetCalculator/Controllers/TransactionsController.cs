@@ -45,7 +45,52 @@ namespace BudgetCalculator.Controllers
         {
             int userId = userServices.GetUserId();
             IEnumerable<WeeklyReport> model = await reportsService.GetByWeeklyReport(userId, month, year, ViewBag);
-            return View();
+            var grouped = model.GroupBy(x => x.Weeks).Select(x => new WeeklyReport()
+            {
+                Weeks = x.Key,
+                Incomes = x.Where(x => x.OperationTypeId == OperationType.Income).Select(x => x.Monto).FirstOrDefault(),
+                Expenses = x.Where(x => x.OperationTypeId == OperationType.Expense).Select(x => x.Monto).FirstOrDefault()
+            }).ToList();
+
+            if (month == 0 || year == 0)
+            {
+                var today = DateTime.Today;
+                month = today.Month;
+                year = today.Year;
+            }
+            var referenceDateTime = new DateTime(year, month, 1);
+            var monthDays = Enumerable.Range(1, referenceDateTime.AddMonths(1).AddDays(-1).Day);
+            var segmentedDays = monthDays.Chunk(7).ToList();
+            for (int i = 0; i < segmentedDays.Count; i++)
+            {
+                var week = i + 1;
+                var startDate = new DateTime(year, month, segmentedDays[i].First());
+                var endDate = new DateTime(year, month, segmentedDays[i].Last());
+                var weekGroup = grouped.FirstOrDefault(x => x.Weeks == week);
+                if (weekGroup == null)
+                {
+                    grouped.Add(
+                        new WeeklyReport()
+                        {
+                            Weeks = week,
+                            StartDate = startDate,
+                            EndDate = endDate
+                        }
+                        );
+                }
+                else
+                {
+                    weekGroup.StartDate = startDate;
+                    weekGroup.EndDate = endDate;
+                }
+            }
+            grouped = grouped.OrderByDescending(x => x.Weeks).ToList();
+            var viewModel = new WeeklyReportViewModel()
+            {
+                WeeklyReports = grouped,
+                ReferenceDate = referenceDateTime
+            };
+            return View(viewModel);
         }
 
         public IActionResult Monthly()

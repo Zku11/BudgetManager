@@ -1,3 +1,11 @@
 ﻿#reorderable tr{
     cursor: move;
 }
+
+.active{
+    color: green;
+}
+
+.pasive{
+    color: red;
+}

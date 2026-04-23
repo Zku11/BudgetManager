@@ -1,5 +1,52 @@
-﻿@{
+﻿@model WeeklyReportViewModel
+
+@{
 	ViewData["Title"] = "Reporte Semanal";
+
+	string FormatDate(DateTime date)
+	{
+		return date.ToString("MM.dd");
+	}
+
+	var montosResume = new MontosResumeViewModel()
+	{
+		Incomes = Model.Incomes,
+		Expenses = Model.Expenses,
+		Total = Model.Total
+	};
 }
 
 <partial name="_Submenu" model="TransactionsSubmenu.Weekly"/>
+
+<partial name="_NavigateBetweenMonths" model="@Model.ReferenceDate" />
+
+<partial name="_MontosResume" model="@montosResume" />
+
+<table class="table fs-5">
+	<thead>
+		<tr>
+			<th>Semana</th>
+			<th class="text-end">Ingresos</th>
+			<th class="text-end">Gastos</th>
+		</tr>
+	</thead>
+	<tbody>
+		@foreach (var weeklyReport in Model.WeeklyReports)
+		{
+			<tr>
+				<td>
+					<a asp-action="Index" asp-route-year="@Model.ReferenceDate.Year" asp-route-month="@Model.ReferenceDate.Month">
+						@FormatDate(weeklyReport.StartDate) ~ @FormatDate(weeklyReport.EndDate)
+					</a>
+				</td>
+				<td class="active text-end">
+					@weeklyReport.Incomes
+				</td>
+				<td class="pasive text-end">
+					@weeklyReport.Expenses
+				</td>
+			</tr>
+		}
+	</tbody>
+	
+</table>
