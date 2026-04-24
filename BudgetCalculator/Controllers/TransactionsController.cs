@@ -93,9 +93,48 @@ namespace BudgetCalculator.Controllers
             return View(viewModel);
         }
 
-        public IActionResult Monthly()
+        public async Task<IActionResult> Monthly(int year)
         {
-            return View();
+            int userId = userServices.GetUserId();
+            if (year == 0)
+            {
+                year = DateTime.Today.Year;
+            }
+            var transactionsByMonth = await transactionsRepository.GetByMonth(userId, year);
+            var groupedtransactionsByMonth = transactionsByMonth.GroupBy(x => x.Month).Select(
+                x => new MonthlyReport()
+                {
+                    Month = x.Key,
+                    Incomes = x.Where(x => x.OperationTypeId == OperationType.Income).Select(x => x.Monto).FirstOrDefault(),
+                    Expenses = x.Where(x => x.OperationTypeId == OperationType.Expense).Select(x => x.Monto).FirstOrDefault()
+                }
+                ).ToList();
+            for (int month = 1; month <= 12; month++)
+            {
+                var transaction = groupedtransactionsByMonth.FirstOrDefault(x => x.Month == month);
+                var referenceDate = new DateTime(year, month, 1);
+                if (transaction is null)
+                {
+                    groupedtransactionsByMonth.Add(
+                        new MonthlyReport()
+                        {
+                            Month = month,
+                            ReferenceDate = referenceDate
+                        }
+                        );
+                }
+                else
+                {
+                    transaction.ReferenceDate = referenceDate;
+                }
+                groupedtransactionsByMonth = groupedtransactionsByMonth.OrderByDescending(x => x.Month).ToList();
+            }
+            var viewModel = new MonthlyReportViewModel()
+            {
+                Year = year,
+                TransactionsByMonth= groupedtransactionsByMonth,
+            };
+            return View(viewModel);
         }
 
         public IActionResult ExcelReport()

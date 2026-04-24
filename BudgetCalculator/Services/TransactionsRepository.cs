@@ -10,6 +10,7 @@ namespace BudgetCalculator.Services
         Task Delete(int id);
         Task<IEnumerable<Transaction>> GetByAcountId(GetTransactionsByAcount getTransactionsByAcount);
         Task<Transaction> GetById(int id, int userId);
+        Task<IEnumerable<MonthlyReport>> GetByMonth(int userId, int year);
         Task<IEnumerable<Transaction>> GetByUserId(GetTransactionsByUserParameter getTransactionsByUser);
         Task<IEnumerable<WeeklyReport>> GetByWeek(GetTransactionsByUserParameter model);
         Task Update(Transaction transaction, decimal PreviousMonto, int PreviousAcountId);
@@ -76,6 +77,18 @@ namespace BudgetCalculator.Services
                         WHERE tra.UserId = @UserId AND TransactionDate BETWEEN @StartDate AND @EndDate
                         GROUP BY DATEDIFF(d, @StartDate, TransactionDate) / 7, cat.OperationTypeId",
                         model);
+        }
+
+        public async Task<IEnumerable<MonthlyReport>> GetByMonth(int userId, int year)
+        {
+            using SqlConnection sqlConnection = new SqlConnection(connectionString);
+            return await sqlConnection.QueryAsync<MonthlyReport>(@"SELECT MONTH(TransactionDate) as Month, SUM(Monto) as Monto, cat.OperationTypeId 
+                    FROM Transactions tra
+                    INNER JOIN Categories cat ON cat.Id = tra.CategoryId
+                    WHERE tra.UserId = @UserId AND YEAR(TransactionDate) = @Year
+                    GROUP BY MONTH(TransactionDate), cat.OperationTypeId",
+                    new {userId, year}
+                    );
         }
 
         public async Task Delete(int id)
