@@ -1,10 +1,12 @@
 ﻿using AutoMapper;
 using BudgetCalculator.Models;
 using BudgetCalculator.Services;
+using ClosedXML.Excel;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Identity.Client;
 using System.Collections;
+using System.Data;
 using System.Reflection;
 using System.Threading.Tasks;
 
@@ -140,6 +142,60 @@ namespace BudgetCalculator.Controllers
         public IActionResult ExcelReport()
         {
             return View();
+        }
+
+        [HttpGet]
+        public async Task<FileResult> ExcelExportByMonth(int month, int year)
+        {
+            DateTime startDate = new DateTime(year, month, 1);
+            DateTime endDate = startDate.AddMonths(1).AddDays(-1);
+            int userId = userServices.GetUserId();
+            IEnumerable<Transaction> transactions = await transactionsRepository.GetByUserId(new GetTransactionsByUserParameter()
+            {
+                UserId = userId,
+                StartDate = startDate,
+                EndDate = endDate
+            });
+            string fileName = $"Manejo presupuesto - {startDate.ToString("MMM yyy")}.xlsx";
+            return GenerateExcel(fileName, transactions);
+        }
+
+        private FileResult GenerateExcel(string fileName, IEnumerable<Transaction> transactions)
+        {
+            DataTable dataTable = new DataTable("Transactions");
+            dataTable.Columns.AddRange(new DataColumn[] {
+                new DataColumn("Date"),
+                new DataColumn("Acount"),
+                new DataColumn("Category"),
+                new DataColumn("Note"),
+                new DataColumn("Monto"),
+                new DataColumn("Income/Expense")
+            });
+
+            foreach (Transaction transaction in transactions) { 
+                dataTable.Rows.Add(
+                    transaction.TransactionDate,
+                    transaction.Acount,
+                    transaction.Category,
+                    transaction.Nota,
+                    transaction.Monto,
+                    transaction.OperationTypeId
+                    );
+            }
+
+            using (XLWorkbook wbWorkbook = new XLWorkbook())
+            {
+                wbWorkbook.Worksheets.Add(dataTable);
+                using (MemoryStream memoryStream = new MemoryStream())
+                {
+                    wbWorkbook.SaveAs( memoryStream );
+                    return File(
+                        memoryStream.ToArray(),
+                        "application/vnd.openxmlformats-officedocument.spreadsheet.sheet",
+                        fileName);
+                }
+            }
+            
         }
 
         public IActionResult Calendar()

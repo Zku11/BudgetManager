@@ -114,7 +114,7 @@ namespace BudgetCalculator.Services
         public async Task<IEnumerable<Transaction>> GetByUserId(GetTransactionsByUserParameter getTransactionsByUser)
         {
             using SqlConnection sqlConnection = new SqlConnection(connectionString);
-            return await sqlConnection.QueryAsync<Transaction>(@"SELECT t.Id, t.Monto, t.TransactionDate, c.Name as Category, a.Name as Acount, c.OperationTypeId
+            return await sqlConnection.QueryAsync<Transaction>(@"SELECT t.Id, t.Monto, t.TransactionDate, c.Name as Category, a.Name as Acount, c.OperationTypeId, t.Nota
                                                                 FROM Transactions t
                                                                 INNER JOIN Categories c
                                                                 ON c.id = t.CategoryId
