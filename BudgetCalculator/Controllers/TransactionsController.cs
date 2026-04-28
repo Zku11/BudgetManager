@@ -2,6 +2,7 @@
 using BudgetCalculator.Models;
 using BudgetCalculator.Services;
 using ClosedXML.Excel;
+using DocumentFormat.OpenXml.Spreadsheet;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Identity.Client;
@@ -157,6 +158,38 @@ namespace BudgetCalculator.Controllers
                 EndDate = endDate
             });
             string fileName = $"Manejo presupuesto - {startDate.ToString("MMM yyy")}.xlsx";
+            return GenerateExcel(fileName, transactions);
+        }
+
+        [HttpGet]
+        public async Task<FileResult> ExcelExportByYear(int year)
+        {
+            DateTime startDate = new DateTime(year, 1, 1);
+            DateTime endDate = startDate.AddYears(1).AddDays(-1);
+            int userId = userServices.GetUserId();
+            IEnumerable<Transaction> transactions = await transactionsRepository.GetByUserId(new GetTransactionsByUserParameter()
+            {
+                UserId = userId,
+                StartDate = startDate,
+                EndDate = endDate
+            });
+            string fileName = $"Manejo Presupuesto - {startDate.ToString("yyyy")}.xlsx";
+            return GenerateExcel(fileName, transactions);
+        }
+
+        [HttpGet]
+        public async Task<FileResult> ExcelExportAll()
+        {
+            DateTime startDate = DateTime.Today.AddYears(-100);
+            DateTime endDate = startDate.AddYears(100);
+            int userId = userServices.GetUserId();
+            IEnumerable<Transaction> transactions = await transactionsRepository.GetByUserId(new GetTransactionsByUserParameter()
+            {
+                UserId = userId,
+                StartDate = startDate,
+                EndDate = endDate
+            });
+            string fileName = $"Manejo Presupuesto - {DateTime.Today.ToString("dd-MM-yyyy")}.xlsx";
             return GenerateExcel(fileName, transactions);
         }
 

@@ -5,7 +5,8 @@
 	int currentMonth = today.Month;
 	int currentYear = today.Year;
 	int previousMonth = oneMonthAgo.Month;
-	int previousYear = oneMonthAgo.Year;
+	int previousMonthYear = oneMonthAgo.Year;
+	int previousYear = currentYear - 1;
 }
 
 <partial name="_Submenu" model="TransactionsSubmenu.ExcelReport"/>
@@ -19,25 +20,25 @@
 </div>
 
 <div class="mb-3">
-	<a class="btn btn-success" asp-action="ExcelExportByMonth" asp-route-month="@previousMonth" asp-route-year="@previousYear">
+	<a class="btn btn-success" asp-action="ExcelExportByMonth" asp-route-month="@previousMonth" asp-route-year="@previousMonthYear">
 		Exportar mes anterior
 	</a> ~ @oneMonthAgo.ToString("MMMM yyyy")
 </div>
 
 <div class="mb-3">
-	<a class="btn btn-success" asp-action="ExcelExportByMonth" asp-route-month="@previousMonth" asp-route-year="@previousYear">
+	<a class="btn btn-success" asp-action="ExcelExportByYear" asp-route-year="@currentYear">
 		Exportar año actual
-	</a> ~ @today.ToString("MMMM yyyy")
+	</a> ~ @currentYear
 </div>
 
 <div class="mb-3">
-	<a class="btn btn-success" asp-action="ExcelExportByMonth" asp-route-month="@previousMonth" asp-route-year="@previousYear">
+	<a class="btn btn-success" asp-action="ExcelExportByYear" asp-route-year="@previousYear">
 		Exportar año anterior
-	</a> ~ @today.ToString("MMMM yyyy")
+	</a> ~ @previousYear
 </div>
 
 <div class="mb-3">
-	<a class="btn btn-success" asp-action="ExcelExportByMonth" asp-route-month="@previousMonth" asp-route-year="@previousYear">
+	<a class="btn btn-success" asp-action="ExcelExportAll">
 		Exportar todo
 	</a>
 </div>
