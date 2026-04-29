@@ -3,6 +3,7 @@ using BudgetCalculator.Models;
 using BudgetCalculator.Services;
 using ClosedXML.Excel;
 using DocumentFormat.OpenXml.Spreadsheet;
+using DocumentFormat.OpenXml.Wordprocessing;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Identity.Client;
@@ -234,6 +235,27 @@ namespace BudgetCalculator.Controllers
         public IActionResult Calendar()
         {
             return View();
+        }
+
+        public async Task<JsonResult> CalendarReport()
+        {
+            DateTime startDate = DateTime.Today.AddYears(-100);
+            DateTime endDate = startDate.AddYears(100);
+            int userId = userServices.GetUserId();
+            IEnumerable<Transaction> transactions = await transactionsRepository.GetByUserId(new GetTransactionsByUserParameter()
+            {
+                UserId = userId,
+                StartDate = startDate,
+                EndDate = endDate
+            });
+            var calendarEvents = transactions.Select(x => new CalendarEvent()
+            {
+                Title = x.Monto.ToString("N"),
+                start = x.TransactionDate.ToString("yyyy-MM-d"),
+                end = x.TransactionDate.ToString("yyyy-MM-d"),
+                Color = x.OperationTypeId == OperationType.Expense ? "Red" : null
+            });
+            return Json(calendarEvents);
         }
 
         public async Task<IActionResult> Create()

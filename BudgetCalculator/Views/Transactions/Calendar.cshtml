@@ -3,3 +3,29 @@
 }
 
 <partial name="_Submenu" model="TransactionsSubmenu.Calendar"/>
+
+<div id="myCalendar">
+
+</div>
+
+@section Scripts{
+	<script src="~/lib/fullcalendar/main.min.js"></script>
+	<script>
+		document.addEventListener("DOMContentLoaded", function(){
+		const myCalendar = document.getElementById("myCalendar");
+		const calendar = new FullCalendar.Calendar(myCalendar, {
+			dayMaxEventRows: 3,
+			initialView: "dayGridMonth",
+			events: '/transactions/CalendarReport'
+			});
+
+		/*calendar.addEventSource({
+		  url: '/transactions/CalendarReport',
+		  method: 'GET',
+		  extraParams: { startDate: '2026-04-01', endDate: '2026-04-29'}
+		});*/
+
+		calendar.render();
+		});
+	</script>
+}
