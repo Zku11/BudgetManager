@@ -4,8 +4,40 @@
 
 <partial name="_Submenu" model="TransactionsSubmenu.Calendar"/>
 
-<div id="myCalendar">
+<div id="myCalendar"></div>
 
+<!-- Button trigger modal -->
+<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#transactionsModal">
+	Launch demo modal
+</button>
+
+<!-- Modal -->
+<div class="modal fade" id="transactionsModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title fs-5" id="exampleModalLabel">Transacciones del día</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body">
+				<table class="table">
+					<thead>
+						<tr>
+							<th id="tableModalDate" colspan="2"></th>
+							<th id="tableModalIncomes" class="active"></th>
+							<th id="tableModalExpenses" class="pasive"></th>
+						</tr>
+					</thead>
+					<tbody id="tableModalBody">
+
+					</tbody>
+				</table>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+			</div>
+		</div>
+	</div>
 </div>
 
 @section Scripts{
@@ -16,16 +48,55 @@
 		const calendar = new FullCalendar.Calendar(myCalendar, {
 			dayMaxEventRows: 3,
 			initialView: "dayGridMonth",
-			events: '/transactions/CalendarReport'
+			events: '/transactions/CalendarReport',
+			dateClick: async function(info){
+				await SearchTransactionsByDate(info.dateStr);
+			}
 			});
-
-		/*calendar.addEventSource({
-		  url: '/transactions/CalendarReport',
-		  method: 'GET',
-		  extraParams: { startDate: '2026-04-01', endDate: '2026-04-29'}
-		});*/
-
 		calendar.render();
 		});
+
+		async function SearchTransactionsByDate(date){
+			const response = await fetch('/transactions/GetTransactionsByDate?date=' + date,
+			{
+				method: 'GET',
+				headers: {
+					'Content-Type': 'application/json'
+				}
+			} 
+			);
+
+			const json = await response.json();
+			console.log(json);
+
+			let incomes = 0;
+			let expenses = 0;
+			const operationTypesIncomes = 1;
+			const formater = new Intl.NumberFormat('en-US', {style: 'currency', currency: 'USD'});
+
+			const rows = json.map(transaction => {
+				if(transaction.operationTypeId === operationTypesIncomes){
+					incomes += transaction.monto;
+				}
+				else{
+					expenses += transaction.monto;
+				}
+				return `<tr>
+							<td>${transaction.category}</td>
+							<td>${transaction.acount}</td>
+							<td align="right" colspan="2" class="${transaction.operationTypeId === operationTypesIncomes? 'active' : 'pasive' }">
+							${formater.format(transaction.monto)}
+							</td>
+						</tr>`;
+			});
+
+			$("#tableModalBody").html(rows);
+			$("#tableModalIncomes").html(formater.format(incomes));
+			$("#tableModalExpenses").html(formater.format(expenses));
+			$("#tableModalDate").html(date);
+
+			const transactionsModal = new bootstrap.Modal(document.getElementById("transactionsModal"));
+			transactionsModal.show();
+		}
 	</script>
 }

@@ -258,6 +258,18 @@ namespace BudgetCalculator.Controllers
             return Json(calendarEvents);
         }
 
+        public async Task<JsonResult> GetTransactionsByDate(DateTime date)
+        {
+            int userId = userServices.GetUserId();
+            IEnumerable<Transaction> transactions = await transactionsRepository.GetByUserId(new GetTransactionsByUserParameter()
+            {
+                UserId = userId,
+                StartDate = date,
+                EndDate = date
+            });
+            return Json(transactions);
+        }
+
         public async Task<IActionResult> Create()
         {
             int userId = userServices.GetUserId();
